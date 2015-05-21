@@ -1,4 +1,15 @@
 #!/bin/bash
+#
+# +----------------------------------------------------------------------------+
+# |                        systemd-make-environment.sh                         |
+# +----------------------------------------------------------------------------+
+#
+# If this file seems a bit un-organized, you are reading it the wrong way (e.g.
+# not in vim). Reload it in vim, type ":set modeline" (without the quotes), and
+# ":e" (again without the quotes). This will set the proper stuff (see end of
+# file). Do type ":help folds" to read up on vim folding technique.  Hint: use
+# "zo" to open, "zc" to close individual folds.
+
 set -o pipefail
 
 # built-in configuration #{{{
