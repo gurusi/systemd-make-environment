@@ -9,17 +9,18 @@
 # ":e" (again without the quotes). This will set the proper stuff (see end of
 # file). Do type ":help folds" to read up on vim folding technique.  Hint: use
 # "zo" to open, "zc" to close individual folds.
-
+#
+# globals and built-in configuration #{{{
 set -o pipefail
 
-# built-in configuration #{{{
-CONF_DEPS="pcregrep wdiff"
+CONF_DEPS="pcregrep wdiff sed"
 CONF_DO_DEBUG=""
 CONF_DO_PRINT_HELP=""
 CONF_INPUT_FILE=""
 CONF_OUTPUT_FILE=""
 CONF_SCRIPT_NAME="$(basename $0)"
 #}}}
+
 # functions #{{{
 # logging and output#{{{
 
@@ -152,7 +153,7 @@ parse_args() {
 
     # Dazed and confused...
     else
-      die -e "I apparently know about the '$a' argument, but I don't know what to do with it.\nAborting. This is an error in the script. Bug the author, if he is around."
+      die "I apparently know about the '$a' argument, but I don't know what to do with it. Aborting."
     fi
 
     shift
@@ -184,13 +185,15 @@ HERE
   return 0
 }
 #}}}
-# stuff that does the work#{{{
+# stuff that does the actual work #{{{
 #
 get_variable_names() {
   set | pcregrep -o1 '^(\w+)=' 
 }
 
-#}}}#}}}
+#}}}
+#}}}
+
 # init #{{{
 #
 check_CONF_DEPS || die
@@ -208,16 +211,29 @@ check_CONF_OUTPUT_FILE; errors=$(( $errors + $? ))
 # Stop if there are any errors in the configuration.
 [ "$errors" -gt 0 ] && die "$errors error(s) found in the configuration."
 unset errors
-
 #}}}
+
 # main#{{{
 
-# Gather the input
-var_names_before=""
-var_names_before=$(get_variable_names); log_debug "var_names_before=\"$var_names_before\""
+# Gather the environment variables before evaluating the script
+var_names_before=""                                                             # set this variable, otherwise it show up in the diff
+var_names_before=$(get_variable_names)
+log_debug "var_names_before=\"$var_names_before\""
+
+# Evaluate the script
 . "$CONF_INPUT_FILE"
-var_names_after=$(get_variable_names); log_debug "var_names_after=\"$var_names_after\""
-added_var_names=$(wdiff --no-common --no-deleted <(echo $var_names_before) <(echo $var_names_after) | pcregrep -o1 '^\s(.*)' | sed ':a;$!{N;ba};s/\n/ /g')
+
+# Gather the environment variables after evaluating the script
+var_names_after=$(get_variable_names)
+log_debug "var_names_after=\"$var_names_after\""
+
+# Spot the difference!
+added_var_names=$( \
+  wdiff --no-common --no-deleted <(echo $var_names_before) <(echo $var_names_after) \
+  | pcregrep -v '^=' \
+  | pcregrep -o2 '^(\s*)?(.*)' \
+  | sed ':a;$!{N;ba};s/\n/ /g' \
+)
 
 # Do the output
 [ -e "$CONF_OUTPUT_FILE" ] && {
@@ -231,7 +247,6 @@ for var_name in $added_var_names; do
     echo "$var_name=\"${!var_name}\""  >> "$CONF_OUTPUT_FILE"
   fi
 done
-
 #}}}
 
 # vim: set tabstop=2 shiftwidth=2 expandtab colorcolumn=80 foldmethod=marker foldcolumn=3 foldlevel=0:

@@ -1,5 +1,5 @@
 NAME=systemd-make-environment
-VERSION=0.02
+VERSION=0.04
 PACKAGE=$(NAME)_$(VERSION).deb
 
 .PHONY: package
