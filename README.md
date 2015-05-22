@@ -1,9 +1,10 @@
 # systemd-make-environment
-Let's say that you'd like to run a daemon *food* on your Linux box. The Linux
-distribution you are using comes with [http://en.wikipedia.org/wiki/Systemd](systemd) 
-as its init system. No one has written a systemd service unit file for *food*,
-so you're on your own. *food* needs to have some environment variables set, like
-*PIZZA_TYPE*. So far so good.
+Let's say that you have written an application *foo* and that you have converted
+it into a daemon called *foo****d***. The Linux distribution you are using comes
+with [http://en.wikipedia.org/wiki/Systemd](systemd) as its init system. No one
+has written a systemd service unit file for *food*, so you're on your own.
+*food* needs to have some environment variables set, like *PIZZA_TYPE*. So far
+so good.
 
 But, there is a problem: *PIZZA_TYPE* isn't static, such as:
 ```
