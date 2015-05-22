@@ -83,7 +83,7 @@ START_DAEMON_ARGS=" \
     -XX:+UseLargePages \
     -XX:+UseConcMarkSweepGC \
     -XX:+CMSIncrementalMode \
-    si.guru.recommendations.RmiServer jdbc:postgresql://127.0.0.1:5432/telekom pigeon b1gd4t4 ${AICODE} \
+    si.guru.recommendations.RmiServer jdbc:postgresql://127.0.0.1 ${AICODE} \
 "
 
 STOP_DAEMON_ARGS=" \
