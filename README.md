@@ -1,30 +1,34 @@
 # systemd-make-environment
 Let's say that you have written an application *foo* and that you have converted
-it into a daemon called *foo****d***. The Linux distribution you are using comes
-with [http://en.wikipedia.org/wiki/Systemd](systemd) as its init system. No one
-has written a systemd service unit file for *food*, so you're on your own.
-*food* needs to have some environment variables set, like *PIZZA_TYPE*. So far
-so good.
+it into a daemon called *foo****d***. You'd like to run *food* on your Linux box
+properly (as a system service with all the bells and whistles), and the Linux
+distribution you are running comes with [*systemd*](http://en.wikipedia.org/wiki/Systemd) as its init system. 
+Sooner or later, you are bound to need a [*service unit file*](http://www.freedesktop.org/software/systemd/man/systemd.service.html) for *food*
+in order to run it the *systemd* way. 
 
-But, there is a problem: *PIZZA_TYPE* isn't static, such as:
+*food* is a bit special. In order to run properly, it needs to have some
+environment variables set, like *PIZZA_TYPE*. Okay, but *PIZZA_TYPE* isn't
+***static***, such as:
 ```
 PIZZA_TYPE="margerita"
 ```
-... but gets set dynamically by some weird shell magic that kinda looks like this:
+... but instead gets set ***dynamically*** by some clever shell magic you
+devised in order to save you tedious programming in -- I dunno -- Java. The
+magic kinda looks like this:
 ```
 PIZZA_TYPE=$(grep -Eiv '(meat|eggs)' /var/lib/pizza/pizza-types | head -n1)
 ```
 
-You can't just stick this expression in */etc/default/food* and say this in the
-*/lib/systemd/system/food.service* unit file:
+You can't just stick this expression in */etc/default/food* and instruct
+*systemd* to use it in tje */lib/systemd/system/food.service* unit file:
 ```
 EnvironmentFile=/etc/default/food
 ```
 ... because *systemd* **doesn't evaulate** the environment files you give it; it
 just reads the *EnvironmentFile*, line by line, and sets the environment
 variables verbatim. *Some say that this is a security feature. And that you are
-better off without it. All we know is...* that the Stig won't set our environment
-variables for us. We'll have to do it ourselves.
+better off without it. All we know is...* that the Stig won't set our
+environment variables for us. We'll have to do it ourselves.
 
 So, do your environment stuff in */etc/default/food*, and set the *ExecStartPre*
 hook in your */lib/systemd/system/food.service* like so:
